@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.HuojiangDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huojiang_name as huojiangName
+        ,a.huojiang_uuid_number as huojiangUuidNumber
+        ,a.huojiang_photo as huojiangPhoto
+        ,a.huojiang_types as huojiangTypes
+        ,a.huojiang_xues as huojiangXues
+        ,a.huojiang_content as huojiangContent
+        ,a.huojiang_delete as huojiangDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.HuojiangView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM huojiang  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.huojiangName != '' and params.huojiangName != null and params.huojiangName != 'null' ">
+                and a.huojiang_name like CONCAT('%',#{params.huojiangName},'%')
+            </if>
+            <if test=" params.huojiangUuidNumber != '' and params.huojiangUuidNumber != null and params.huojiangUuidNumber != 'null' ">
+                and a.huojiang_uuid_number like CONCAT('%',#{params.huojiangUuidNumber},'%')
+            </if>
+            <if test="params.huojiangTypes != null and params.huojiangTypes != ''">
+                and a.huojiang_types = #{params.huojiangTypes}
+            </if>
+            <if test="params.huojiangXuesStart != null and params.huojiangXuesStart != ''">
+                <![CDATA[  and a.huojiang_xues >= #{params.huojiangXuesStart}   ]]>
+            </if>
+            <if test="params.huojiangXuesEnd != null and params.huojiangXuesEnd != ''">
+                <![CDATA[  and a.huojiang_xues <= #{params.huojiangXuesEnd}   ]]>
+            </if>
+             <if test="params.huojiangXues != null and params.huojiangXues != ''">
+                and a.huojiang_xues = #{params.huojiangXues}
+             </if>
+            <if test=" params.huojiangContent != '' and params.huojiangContent != null and params.huojiangContent != 'null' ">
+                and a.huojiang_content like CONCAT('%',#{params.huojiangContent},'%')
+            </if>
+            <if test="params.huojiangDeleteStart != null and params.huojiangDeleteStart != ''">
+                <![CDATA[  and a.huojiang_delete >= #{params.huojiangDeleteStart}   ]]>
+            </if>
+            <if test="params.huojiangDeleteEnd != null and params.huojiangDeleteEnd != ''">
+                <![CDATA[  and a.huojiang_delete <= #{params.huojiangDeleteEnd}   ]]>
+            </if>
+             <if test="params.huojiangDelete != null and params.huojiangDelete != ''">
+                and a.huojiang_delete = #{params.huojiangDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

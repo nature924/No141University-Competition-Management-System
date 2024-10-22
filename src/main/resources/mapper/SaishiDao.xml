@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.SaishiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.saishi_name as saishiName
+        ,a.saishi_uuid_number as saishiUuidNumber
+        ,a.saishi_photo as saishiPhoto
+        ,a.saishi_address as saishiAddress
+        ,a.saishi_types as saishiTypes
+        ,a.saishi_content as saishiContent
+        ,a.saishi_delete as saishiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.SaishiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM saishi  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.saishiName != '' and params.saishiName != null and params.saishiName != 'null' ">
+                and a.saishi_name like CONCAT('%',#{params.saishiName},'%')
+            </if>
+            <if test=" params.saishiUuidNumber != '' and params.saishiUuidNumber != null and params.saishiUuidNumber != 'null' ">
+                and a.saishi_uuid_number like CONCAT('%',#{params.saishiUuidNumber},'%')
+            </if>
+            <if test=" params.saishiAddress != '' and params.saishiAddress != null and params.saishiAddress != 'null' ">
+                and a.saishi_address like CONCAT('%',#{params.saishiAddress},'%')
+            </if>
+            <if test="params.saishiTypes != null and params.saishiTypes != ''">
+                and a.saishi_types = #{params.saishiTypes}
+            </if>
+            <if test=" params.saishiContent != '' and params.saishiContent != null and params.saishiContent != 'null' ">
+                and a.saishi_content like CONCAT('%',#{params.saishiContent},'%')
+            </if>
+            <if test="params.saishiDeleteStart != null and params.saishiDeleteStart != ''">
+                <![CDATA[  and a.saishi_delete >= #{params.saishiDeleteStart}   ]]>
+            </if>
+            <if test="params.saishiDeleteEnd != null and params.saishiDeleteEnd != ''">
+                <![CDATA[  and a.saishi_delete <= #{params.saishiDeleteEnd}   ]]>
+            </if>
+             <if test="params.saishiDelete != null and params.saishiDelete != ''">
+                and a.saishi_delete = #{params.saishiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

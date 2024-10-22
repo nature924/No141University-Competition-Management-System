@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.SaishiTijiaoDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.saishi_tijiao_uuid_number as saishiTijiaoUuidNumber
+        ,a.saishi_id as saishiId
+        ,a.laoshi_id as laoshiId
+        ,a.yonghu_id as yonghuId
+        ,a.saishi_tijiao_text as saishiTijiaoText
+        ,a.saishi_shangchuan_file as saishiShangchuanFile
+        ,a.saishi_tijiao_yesno_types as saishiTijiaoYesnoTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.SaishiTijiaoView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,laoshi.laoshi_name as laoshiName
+        ,laoshi.laoshi_phone as laoshiPhone
+        ,laoshi.laoshi_id_number as laoshiIdNumber
+        ,laoshi.laoshi_photo as laoshiPhoto
+        ,laoshi.laoshi_email as laoshiEmail
+        ,saishi.saishi_name as saishiName
+        ,saishi.saishi_uuid_number as saishiUuidNumber
+        ,saishi.saishi_photo as saishiPhoto
+        ,saishi.saishi_address as saishiAddress
+        ,saishi.saishi_types as saishiTypes
+        ,saishi.saishi_content as saishiContent
+        ,saishi.saishi_delete as saishiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM saishi_tijiao  a
+        left JOIN laoshi laoshi ON a.laoshi_id = laoshi.id
+        left JOIN saishi saishi ON a.saishi_id = saishi.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.saishiTijiaoUuidNumber != '' and params.saishiTijiaoUuidNumber != null and params.saishiTijiaoUuidNumber != 'null' ">
+                and a.saishi_tijiao_uuid_number like CONCAT('%',#{params.saishiTijiaoUuidNumber},'%')
+            </if>
+            <if test="params.saishiId != null and params.saishiId != ''">
+                and (
+                    a.saishi_id = #{params.saishiId}
+                )
+            </if>
+            <if test="params.laoshiId != null and params.laoshiId != ''">
+                and (
+                    a.laoshi_id = #{params.laoshiId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.saishiTijiaoText != '' and params.saishiTijiaoText != null and params.saishiTijiaoText != 'null' ">
+                and a.saishi_tijiao_text like CONCAT('%',#{params.saishiTijiaoText},'%')
+            </if>
+            <if test="params.saishiTijiaoYesnoTypes != null and params.saishiTijiaoYesnoTypes != ''">
+                and a.saishi_tijiao_yesno_types = #{params.saishiTijiaoYesnoTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断老师的id不为空 -->
+            <if test=" params.laoshiIdNotNull != '' and params.laoshiIdNotNull != null and params.laoshiIdNotNull != 'null' ">
+                and a.laoshi_id IS NOT NULL
+            </if>
+            <if test=" params.laoshiName != '' and params.laoshiName != null and params.laoshiName != 'null' ">
+                and laoshi.laoshi_name like CONCAT('%',#{params.laoshiName},'%')
+            </if>
+            <if test=" params.laoshiPhone != '' and params.laoshiPhone != null and params.laoshiPhone != 'null' ">
+                and laoshi.laoshi_phone like CONCAT('%',#{params.laoshiPhone},'%')
+            </if>
+            <if test=" params.laoshiIdNumber != '' and params.laoshiIdNumber != null and params.laoshiIdNumber != 'null' ">
+                and laoshi.laoshi_id_number like CONCAT('%',#{params.laoshiIdNumber},'%')
+            </if>
+            <if test=" params.laoshiEmail != '' and params.laoshiEmail != null and params.laoshiEmail != 'null' ">
+                and laoshi.laoshi_email like CONCAT('%',#{params.laoshiEmail},'%')
+            </if>
+                <!-- 判断赛事的id不为空 -->
+            <if test=" params.saishiIdNotNull != '' and params.saishiIdNotNull != null and params.saishiIdNotNull != 'null' ">
+                and a.saishi_id IS NOT NULL
+            </if>
+            <if test=" params.saishiName != '' and params.saishiName != null and params.saishiName != 'null' ">
+                and saishi.saishi_name like CONCAT('%',#{params.saishiName},'%')
+            </if>
+            <if test=" params.saishiUuidNumber != '' and params.saishiUuidNumber != null and params.saishiUuidNumber != 'null' ">
+                and saishi.saishi_uuid_number like CONCAT('%',#{params.saishiUuidNumber},'%')
+            </if>
+            <if test=" params.saishiAddress != '' and params.saishiAddress != null and params.saishiAddress != 'null' ">
+                and saishi.saishi_address like CONCAT('%',#{params.saishiAddress},'%')
+            </if>
+            <if test="params.saishiTypes != null  and params.saishiTypes != ''">
+                and saishi.saishi_types = #{params.saishiTypes}
+            </if>
+
+            <if test=" params.saishiContent != '' and params.saishiContent != null and params.saishiContent != 'null' ">
+                and saishi.saishi_content like CONCAT('%',#{params.saishiContent},'%')
+            </if>
+            <if test="params.saishiDeleteStart != null  and params.saishiDeleteStart != '' ">
+                <![CDATA[  and saishi.saishi_delete >= #{params.saishiDeleteStart}   ]]>
+            </if>
+            <if test="params.saishiDeleteEnd != null  and params.saishiDeleteEnd != '' ">
+                <![CDATA[  and saishi.saishi_delete <= #{params.saishiDeleteEnd}   ]]>
+            </if>
+            <if test="params.saishiDelete != null  and params.saishiDelete != '' ">
+                and saishi.saishi_delete = #{params.saishiDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(saishi.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(saishi.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

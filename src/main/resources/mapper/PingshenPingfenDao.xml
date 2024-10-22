@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.PingshenPingfenDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.pingshen_pingfen_uuid_number as pingshenPingfenUuidNumber
+        ,a.pingshen_fenpei_id as pingshenFenpeiId
+        ,a.zhuanjia_id as zhuanjiaId
+        ,a.pingshen_pingfen_pingfen as pingshenPingfenPingfen
+        ,a.pingshen_pingfen_text as pingshenPingfenText
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.PingshenPingfenView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,pingshenFenpei.pingshen_fenpei_uuid_number as pingshenFenpeiUuidNumber
+        ,pingshenFenpei.zhuanjia_id as pingshenFenpeiZhuanjiaId
+        ,pingshenFenpei.pingshen_fenpei_text as pingshenFenpeiText
+        ,zhuanjia.zhuanjia_name as zhuanjiaName
+        ,zhuanjia.zhuanjia_phone as zhuanjiaPhone
+        ,zhuanjia.zhuanjia_id_number as zhuanjiaIdNumber
+        ,zhuanjia.zhuanjia_photo as zhuanjiaPhoto
+        ,zhuanjia.zhuanjia_email as zhuanjiaEmail
+
+        FROM pingshen_pingfen  a
+        left JOIN pingshen_fenpei pingshenFenpei ON a.pingshen_fenpei_id = pingshenFenpei.id
+        left JOIN zhuanjia zhuanjia ON a.zhuanjia_id = zhuanjia.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.pingshenPingfenUuidNumber != '' and params.pingshenPingfenUuidNumber != null and params.pingshenPingfenUuidNumber != 'null' ">
+                and a.pingshen_pingfen_uuid_number like CONCAT('%',#{params.pingshenPingfenUuidNumber},'%')
+            </if>
+            <if test="params.pingshenFenpeiId != null and params.pingshenFenpeiId != ''">
+                and (
+                    a.pingshen_fenpei_id = #{params.pingshenFenpeiId}
+                )
+            </if>
+            <if test="params.zhuanjiaId != null and params.zhuanjiaId != ''">
+                and (
+                    a.zhuanjia_id = #{params.zhuanjiaId}
+                    or pingshenFenpei.zhuanjia_id = #{params.zhuanjiaId}
+                )
+            </if>
+            <if test="params.pingshenPingfenPingfenStart != null and params.pingshenPingfenPingfenStart != ''">
+                <![CDATA[  and a.pingshen_pingfen_pingfen >= #{params.pingshenPingfenPingfenStart}   ]]>
+            </if>
+            <if test="params.pingshenPingfenPingfenEnd != null and params.pingshenPingfenPingfenEnd != ''">
+                <![CDATA[  and a.pingshen_pingfen_pingfen <= #{params.pingshenPingfenPingfenEnd}   ]]>
+            </if>
+             <if test="params.pingshenPingfenPingfen != null and params.pingshenPingfenPingfen != ''">
+                and a.pingshen_pingfen_pingfen = #{params.pingshenPingfenPingfen}
+             </if>
+            <if test=" params.pingshenPingfenText != '' and params.pingshenPingfenText != null and params.pingshenPingfenText != 'null' ">
+                and a.pingshen_pingfen_text like CONCAT('%',#{params.pingshenPingfenText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断评审分配的id不为空 -->
+            <if test=" params.pingshenFenpeiIdNotNull != '' and params.pingshenFenpeiIdNotNull != null and params.pingshenFenpeiIdNotNull != 'null' ">
+                and a.pingshen_fenpei_id IS NOT NULL
+            </if>
+            <if test=" params.pingshenFenpeiUuidNumber != '' and params.pingshenFenpeiUuidNumber != null and params.pingshenFenpeiUuidNumber != 'null' ">
+                and pingshenFenpei.pingshen_fenpei_uuid_number like CONCAT('%',#{params.pingshenFenpeiUuidNumber},'%')
+            </if>
+            <if test="params.pingshenId != null  and params.pingshenId != ''">
+                and pingshenFenpei.pingshen_id = #{params.pingshenId}
+            </if>
+            <if test=" params.pingshenFenpeiText != '' and params.pingshenFenpeiText != null and params.pingshenFenpeiText != 'null' ">
+                and pingshenFenpei.pingshen_fenpei_text like CONCAT('%',#{params.pingshenFenpeiText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(pingshenFenpei.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(pingshenFenpei.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断专家的id不为空 -->
+            <if test=" params.zhuanjiaIdNotNull != '' and params.zhuanjiaIdNotNull != null and params.zhuanjiaIdNotNull != 'null' ">
+                and a.zhuanjia_id IS NOT NULL
+            </if>
+            <if test=" params.zhuanjiaName != '' and params.zhuanjiaName != null and params.zhuanjiaName != 'null' ">
+                and zhuanjia.zhuanjia_name like CONCAT('%',#{params.zhuanjiaName},'%')
+            </if>
+            <if test=" params.zhuanjiaPhone != '' and params.zhuanjiaPhone != null and params.zhuanjiaPhone != 'null' ">
+                and zhuanjia.zhuanjia_phone like CONCAT('%',#{params.zhuanjiaPhone},'%')
+            </if>
+            <if test=" params.zhuanjiaIdNumber != '' and params.zhuanjiaIdNumber != null and params.zhuanjiaIdNumber != 'null' ">
+                and zhuanjia.zhuanjia_id_number like CONCAT('%',#{params.zhuanjiaIdNumber},'%')
+            </if>
+            <if test=" params.zhuanjiaEmail != '' and params.zhuanjiaEmail != null and params.zhuanjiaEmail != 'null' ">
+                and zhuanjia.zhuanjia_email like CONCAT('%',#{params.zhuanjiaEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

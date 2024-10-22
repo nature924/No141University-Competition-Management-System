@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.PingshenDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.pingshen_uuid_number as pingshenUuidNumber
+        ,a.saishi_tijiao_id as saishiTijiaoId
+        ,a.laoshi_id as laoshiId
+        ,a.pingshen_file as pingshenFile
+        ,a.pingshen_zhidao as pingshenZhidao
+        ,a.pingshen_text as pingshenText
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.PingshenView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,laoshi.laoshi_name as laoshiName
+        ,laoshi.laoshi_phone as laoshiPhone
+        ,laoshi.laoshi_id_number as laoshiIdNumber
+        ,laoshi.laoshi_photo as laoshiPhoto
+        ,laoshi.laoshi_email as laoshiEmail
+        ,saishiTijiao.saishi_tijiao_uuid_number as saishiTijiaoUuidNumber
+        ,saishiTijiao.laoshi_id as saishiTijiaoLaoshiId
+        ,saishiTijiao.yonghu_id as saishiTijiaoYonghuId
+        ,saishiTijiao.saishi_tijiao_text as saishiTijiaoText
+        ,saishiTijiao.saishi_shangchuan_file as saishiShangchuanFile
+        ,saishiTijiao.saishi_tijiao_yesno_types as saishiTijiaoYesnoTypes
+
+        FROM pingshen  a
+        left JOIN laoshi laoshi ON a.laoshi_id = laoshi.id
+        left JOIN saishi_tijiao saishiTijiao ON a.saishi_tijiao_id = saishiTijiao.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.pingshenUuidNumber != '' and params.pingshenUuidNumber != null and params.pingshenUuidNumber != 'null' ">
+                and a.pingshen_uuid_number like CONCAT('%',#{params.pingshenUuidNumber},'%')
+            </if>
+            <if test="params.saishiTijiaoId != null and params.saishiTijiaoId != ''">
+                and (
+                    a.saishi_tijiao_id = #{params.saishiTijiaoId}
+                )
+            </if>
+            <if test="params.laoshiId != null and params.laoshiId != ''">
+                and (
+                    a.laoshi_id = #{params.laoshiId}
+                    or saishiTijiao.laoshi_id = #{params.laoshiId}
+                )
+            </if>
+            <if test=" params.pingshenZhidao != '' and params.pingshenZhidao != null and params.pingshenZhidao != 'null' ">
+                and a.pingshen_zhidao like CONCAT('%',#{params.pingshenZhidao},'%')
+            </if>
+            <if test=" params.pingshenText != '' and params.pingshenText != null and params.pingshenText != 'null' ">
+                and a.pingshen_text like CONCAT('%',#{params.pingshenText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断老师的id不为空 -->
+            <if test=" params.laoshiIdNotNull != '' and params.laoshiIdNotNull != null and params.laoshiIdNotNull != 'null' ">
+                and a.laoshi_id IS NOT NULL
+            </if>
+            <if test=" params.laoshiName != '' and params.laoshiName != null and params.laoshiName != 'null' ">
+                and laoshi.laoshi_name like CONCAT('%',#{params.laoshiName},'%')
+            </if>
+            <if test=" params.laoshiPhone != '' and params.laoshiPhone != null and params.laoshiPhone != 'null' ">
+                and laoshi.laoshi_phone like CONCAT('%',#{params.laoshiPhone},'%')
+            </if>
+            <if test=" params.laoshiIdNumber != '' and params.laoshiIdNumber != null and params.laoshiIdNumber != 'null' ">
+                and laoshi.laoshi_id_number like CONCAT('%',#{params.laoshiIdNumber},'%')
+            </if>
+            <if test=" params.laoshiEmail != '' and params.laoshiEmail != null and params.laoshiEmail != 'null' ">
+                and laoshi.laoshi_email like CONCAT('%',#{params.laoshiEmail},'%')
+            </if>
+                <!-- 判断赛事提交的id不为空 -->
+            <if test=" params.saishiTijiaoIdNotNull != '' and params.saishiTijiaoIdNotNull != null and params.saishiTijiaoIdNotNull != 'null' ">
+                and a.saishi_tijiao_id IS NOT NULL
+            </if>
+            <if test=" params.saishiTijiaoUuidNumber != '' and params.saishiTijiaoUuidNumber != null and params.saishiTijiaoUuidNumber != 'null' ">
+                and saishiTijiao.saishi_tijiao_uuid_number like CONCAT('%',#{params.saishiTijiaoUuidNumber},'%')
+            </if>
+            <if test="params.saishiId != null  and params.saishiId != ''">
+                and saishiTijiao.saishi_id = #{params.saishiId}
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and saishiTijiao.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.saishiTijiaoText != '' and params.saishiTijiaoText != null and params.saishiTijiaoText != 'null' ">
+                and saishiTijiao.saishi_tijiao_text like CONCAT('%',#{params.saishiTijiaoText},'%')
+            </if>
+            <if test="params.saishiTijiaoYesnoTypes != null  and params.saishiTijiaoYesnoTypes != ''">
+                and saishiTijiao.saishi_tijiao_yesno_types = #{params.saishiTijiaoYesnoTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(saishiTijiao.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(saishiTijiao.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
